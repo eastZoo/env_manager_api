@@ -4,6 +4,7 @@ import {
   Column,
   OneToMany,
   ManyToOne,
+  CreateDateColumn,
 } from 'typeorm';
 import { File } from './file.entity';
 
@@ -15,8 +16,8 @@ export class Folder {
   @Column()
   name: string;
 
-  @Column({ default: true })
-  isOpen: boolean;
+  @Column({ nullable: true })
+  isRoot: boolean;
 
   @ManyToOne(() => Folder, (folder) => folder.subFolders, { nullable: true })
   parentFolder: Folder;
@@ -26,4 +27,7 @@ export class Folder {
 
   @OneToMany(() => File, (file) => file.folder)
   files: File[];
+
+  @CreateDateColumn()
+  createdAt: Date;
 }

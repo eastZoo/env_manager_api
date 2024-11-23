@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Folder } from 'src/entities/folder.entity';
 import { Repository } from 'typeorm';
+import { Folder } from 'src/entities/folder.entity';
 
 @Injectable()
 export class FolderService {
@@ -32,11 +32,40 @@ export class FolderService {
     });
   }
 
+  // async getAllRootFolders(): Promise<Folder[]> {
+  //   return this.folderRepository.find({
+  //     where: { parentFolder: null, isRoot: true },
+  //     relations: ['subFolders', 'subFolders.subFolders', 'files'], // 하위 폴더와 그 하위 폴더까지 명시적으로 설정
+  //   });
+  // }
+
   async getAllRootFolders(): Promise<Folder[]> {
-    return this.folderRepository.find({
-      where: { parentFolder: null },
-      relations: ['subFolders', 'files'],
+    const rootFolders = await this.folderRepository.find({
+      where: { parentFolder: null, isRoot: true },
+      relations: ['files'], // 첫 단계에서는 파일만 가져옵니다.
+      order: {
+        createdAt: 'DESC',
+      },
     });
+
+    for (const folder of rootFolders) {
+      folder.subFolders = await this.getAllSubFolders(folder.id);
+    }
+
+    return rootFolders;
+  }
+
+  private async getAllSubFolders(parentFolderId: number): Promise<Folder[]> {
+    const subFolders = await this.folderRepository.find({
+      where: { parentFolder: { id: parentFolderId } },
+      relations: ['files'], // 하위 폴더의 파일 정보도 가져옵니다.
+    });
+
+    for (const subFolder of subFolders) {
+      subFolder.subFolders = await this.getAllSubFolders(subFolder.id);
+    }
+
+    return subFolders;
   }
 
   async deleteFolder(folderId: number): Promise<void> {
