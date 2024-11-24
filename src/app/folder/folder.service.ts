@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Folder } from 'src/entities/folder.entity';
@@ -14,12 +14,17 @@ export class FolderService {
     const newFolder = new Folder();
     newFolder.name = name;
 
+    Logger.log('parentFolderId', parentFolderId);
+    // parentFolderId 가 있다면 해당 폴더를 찾아서 부모 폴더로 설정합니다.
     if (parentFolderId) {
       const parentFolder = await this.folderRepository.findOne({
         where: { id: parentFolderId },
         relations: ['subFolders', 'files'],
       });
       newFolder.parentFolder = parentFolder;
+    } else {
+      // parentFolderId 가 없다면 루트 폴더로 설정합니다.
+      newFolder.isRoot = true;
     }
 
     return this.folderRepository.save(newFolder);
