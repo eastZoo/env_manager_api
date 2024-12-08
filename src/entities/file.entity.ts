@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  DeleteDateColumn,
+} from 'typeorm';
 import { Folder } from './folder.entity';
 
 @Entity()
@@ -10,14 +16,20 @@ export class File {
   name: string;
 
   @Column()
-  type: string; // frontend, backend 등 파일의 타입
+  type: string; // ex. frontend, backend 등
 
   @Column({ nullable: true })
-  fileType: string; // 파일의 확장자
+  fileType: string;
 
-  @Column('jsonb', { default: {} })
-  env: Record<string, string>; // 환경 변수 정보
+  @Column('text', { nullable: true })
+  content: string; // 파일 내용
 
-  @ManyToOne(() => Folder, (folder) => folder.files, { nullable: false })
+  @ManyToOne(() => Folder, (folder) => folder.files, {
+    nullable: false,
+    onDelete: 'CASCADE',
+  })
   folder: Folder;
+
+  @DeleteDateColumn()
+  deletedAt: Date;
 }

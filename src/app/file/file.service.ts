@@ -33,4 +33,21 @@ export class FileService {
   async deleteFile(fileId: number): Promise<void> {
     await this.fileRepository.delete(fileId);
   }
+
+  async getFileContent(fileId: number): Promise<File | string> {
+    const file = await this.fileRepository.findOneOrFail({
+      where: { id: fileId },
+    });
+
+    console.log('file', file);
+    return file || ''; // 파일의 내용을 반환
+  }
+
+  async updateFileContent(fileId: number, content: string): Promise<void> {
+    const file = await this.fileRepository.findOneOrFail({
+      where: { id: fileId },
+    });
+    file.content = content; // 파일 내용을 업데이트
+    await this.fileRepository.save(file);
+  }
 }
