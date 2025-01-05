@@ -15,7 +15,8 @@ export class File {
   @Column()
   name: string;
 
-  @Column()
+  // 왠만든지 모르겠음
+  @Column({ nullable: true })
   type: string; // ex. frontend, backend 등
 
   @Column({ nullable: true })
